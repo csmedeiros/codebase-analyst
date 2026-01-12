@@ -19,6 +19,14 @@
 - README.md atualizado com seção sobre Proteção de Sobrescrita
 - Fluxo de execução do CLI: verificação de arquivo acontece após validações mas antes de criar o agente
 
+### Corrigido
+- **Bug Fix**: Erro `ModuleNotFoundError: No module named 'src'` ao executar de outros diretórios
+  - Corrigido imports em src/cli.py: `from src.agent` → `from .agent`
+  - Corrigido imports em src/agent.py: `from src.prompts` → `from .prompts` e `from src.tools` → `from .tools`
+  - Atualizado src/__init__.py com exports adequados e `__version__`
+  - Agora funciona perfeitamente de qualquer diretório após instalação via pip
+- Documentação completa da correção em BUGFIX_v1.1.1.md
+
 ## [1.0.0] - 2026-01-12
 
 ### Adicionado

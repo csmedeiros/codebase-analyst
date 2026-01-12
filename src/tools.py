@@ -8,7 +8,6 @@ from pathlib import Path
 
 from langchain_core.tools import tool
 
-
 @tool
 def list_dir(path: str) -> str:
     """Lista o conteúdo de um diretório, mostrando arquivos e subdiretórios.
@@ -53,11 +52,12 @@ def read_file(path: str, start: int = 1, end: int | None = None) -> str:
 
     Args:
         path: Caminho do arquivo a ser lido
-        start: Linha inicial (1-indexed, padrão: 1)
-        end: Linha final (1-indexed, inclusive). Se None, lê até o final do arquivo.
+        start: Linha inicial (1-indexed para input, padrão: 1)
+        end: Linha final (1-indexed para input, inclusive). Se None, lê até o final do arquivo.
 
     Returns:
-        Conteúdo do arquivo com números de linha no formato "N: conteúdo"
+        Conteúdo do arquivo com números de linha estilo VS Code (0-indexed, alinhados à esquerda)
+        Formato: "N     conteúdo" onde N é o número da linha começando em 0
     """
     try:
         file_path = Path(path).resolve()
@@ -90,13 +90,19 @@ def read_file(path: str, start: int = 1, end: int | None = None) -> str:
         # Extrair o intervalo (converter para 0-indexed)
         selected_lines = lines[start - 1 : end]
 
-        # Formatar com números de linha
-        numbered_lines = [
-            f"{i}: {line}" for i, line in enumerate(selected_lines, start=start)
-        ]
+        # Calcular largura necessária para os números de linha
+        # Usar o número da última linha para determinar a largura
+        max_line_num = end - 1  # 0-indexed
+        line_num_width = len(str(max_line_num))
+
+        # Formatar com números de linha estilo VS Code (0-indexed, alinhados à esquerda)
+        numbered_lines = []
+        for i, line in enumerate(selected_lines, start=start - 1):  # start - 1 para 0-indexed
+            line_num_str = str(i).ljust(line_num_width)
+            numbered_lines.append(f"{line_num_str}     {line}")
 
         header = f"Arquivo: {file_path}\n"
-        header += f"Linhas: {start}-{end} de {total_lines}\n"
+        header += f"Linhas: {start - 1}-{end - 1} de {total_lines} (0-indexed)\n"
         header += "-" * 40 + "\n"
 
         return header + "\n".join(numbered_lines)
@@ -108,15 +114,16 @@ def read_file(path: str, start: int = 1, end: int | None = None) -> str:
 
 
 @tool
-def write_file(path: str, content: str) -> str:
+def write_file(path: str, content: str, append: bool = False) -> str:
     """Escreve conteúdo em um arquivo, criando diretórios pai se necessário.
 
     Args:
         path: Caminho do arquivo a ser criado/sobrescrito
         content: Conteúdo a ser escrito no arquivo
+        append: Se True, adiciona o conteúdo ao final do arquivo. Se False, sobrescreve.
 
     Returns:
-        Mensagem de confirmação com o caminho do arquivo criado
+        Mensagem de confirmação com o caminho do arquivo criado/atualizado
     """
     try:
         file_path = Path(path).resolve()
@@ -124,12 +131,39 @@ def write_file(path: str, content: str) -> str:
         # Criar diretórios pai se não existirem
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Escrever o conteúdo
-        file_path.write_text(content, encoding="utf-8")
+        # Escrever ou adicionar o conteúdo
+        if append:
+            with open(file_path, "a", encoding="utf-8") as f:
+                f.write("\n\n" + content)
+            action = " teve conteúdo adicionado"
+        else:
+            file_path.write_text(content, encoding="utf-8")
+            action = "criado/sobrescrito"
 
-        return f"Arquivo criado/atualizado com sucesso: {file_path}"
+        return f"Arquivo {action} com sucesso: {file_path}"
 
     except PermissionError:
         return f"Erro: Sem permissão para escrever em '{path}'."
     except Exception as e:
         return f"Erro ao escrever arquivo: {e}"
+    
+import os
+
+@tool
+def remove_draft_file(path: str):
+    """
+    Deleta o arquivo de rascunho DRAFT.md
+
+    Args:
+        path: Caminho para o arquivo de rascunho DRAFT.md
+
+    Returns:
+        Mensagem de confirmacao ou de erro para a exclusao do arquivo de rascunho
+    """
+
+    try:
+        os.remove(path)
+    except PermissionError:
+        return f"Erro: Sem permissão para remover '{path}'."
+    except Exception as e:
+        return f"Erro ao remover arquivo:\n{e}"

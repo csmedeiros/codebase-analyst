@@ -21,7 +21,7 @@ from rich.rule import Rule
 from rich.table import Table
 from rich import box
 
-from src.agent import create_codebase_agent
+from .agent import create_codebase_agent
 
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
@@ -183,15 +183,46 @@ def print_cancelled():
     console.print()
 
 
-def validate_api_key():
-    """Valida se a OPENAI_API_KEY está configurada."""
-    if not os.getenv("OPENAI_API_KEY"):
+def validate_api_key(model_name: str):
+    """Valida se a chave de API necessária está configurada.
+
+    Args:
+        model_name: Nome do modelo no formato 'provider:model' ou apenas 'model'
+
+    Returns:
+        True se a chave de API está configurada, False caso contrário
+    """
+    # Parse do provider
+    if ":" in model_name:
+        provider, _ = model_name.split(":", 1)
+    else:
+        # Default para OpenAI
+        provider = "openai"
+
+    # Mapeamento de providers para variáveis de ambiente
+    provider_env_map = {
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "groq": "GROQ_API_KEY",
+        "google": "GOOGLE_API_KEY",
+        "cohere": "COHERE_API_KEY",
+        "mistral": "MISTRAL_API_KEY",
+        "together": "TOGETHER_API_KEY",
+    }
+
+    env_var = provider_env_map.get(provider.lower())
+
+    if not env_var:
+        # Provider desconhecido, mas vamos deixar o init_chat_model lidar com isso
+        return True
+
+    if not os.getenv(env_var):
         print_error(
-            "OPENAI_API_KEY não encontrada!\n\n"
-            "Por favor, configure sua chave da OpenAI:\n"
-            "  • Crie um arquivo .env na sua pasta home ou no diretório do projeto\n"
-            "  • Adicione a linha: OPENAI_API_KEY=sua-chave-aqui\n"
-            "  • Ou exporte como variável de ambiente: export OPENAI_API_KEY=sua-chave-aqui"
+            f"{env_var} não encontrada!\n\n"
+            f"Por favor, configure sua chave de API do {provider.capitalize()}:\n"
+            f"  • Crie um arquivo .env na sua pasta home ou no diretório do projeto\n"
+            f"  • Adicione a linha: {env_var}=sua-chave-aqui\n"
+            f"  • Ou exporte como variável de ambiente: export {env_var}=sua-chave-aqui"
         )
         return False
     return True
@@ -277,9 +308,16 @@ def check_existing_file(target_path: Path, task: str) -> bool:
         response = input("Deseja continuar e sobrescrever o arquivo? [s/N]: ").strip().lower()
 
         if response in ['s', 'sim', 'y', 'yes']:
-            console.print()
-            console.print(Text(f"  ✓ Arquivo '{filename}' será sobrescrito", style="yellow"))
-            return True
+            # Deletar o arquivo existente
+            try:
+                file_path.unlink()
+                console.print()
+                console.print(Text(f"  ✓ Arquivo '{filename}' deletado e será recriado", style="yellow"))
+                return True
+            except Exception as e:
+                console.print()
+                print_error(f"Erro ao deletar arquivo '{filename}': {e}")
+                return False
         else:
             console.print()
             console.print(Text(f"  ✗ Operação cancelada - arquivo '{filename}' preservado", style="green"))
@@ -300,11 +338,13 @@ def main():
 Exemplos de uso:
   codebase-analyst ./meu-projeto --task analyze
   codebase-analyst ./meu-projeto --task readme
-  codebase-analyst ./meu-projeto --task architecture --model gpt-4o
-  codebase-analyst . --task analyze  # Analisa o diretório atual
+  codebase-analyst ./meu-projeto --task architecture --model openai:gpt-4o
+  codebase-analyst . --task analyze --model anthropic:claude-3-5-sonnet-20241022
+  codebase-analyst . --task readme --model groq:llama-3.3-70b-versatile
 
 Notas:
-  • Requer OPENAI_API_KEY configurada como variável de ambiente ou em arquivo .env
+  • Suporta múltiplos provedores: OpenAI, Anthropic, Groq, Google, etc.
+  • Requer chaves de API configuradas (OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)
   • Compatível com Mac, Windows e Linux
   • Usa caminhos absolutos internamente para funcionar em qualquer diretório
         """,
@@ -317,8 +357,12 @@ Notas:
     )
     parser.add_argument(
         "--model",
-        default="gpt-4o-mini",
-        help="Modelo OpenAI a usar (default: gpt-4o-mini)",
+        default="gpt-5-mini",
+        help=(
+            "Modelo a usar no formato 'provider:model' ou apenas 'model' (default: gpt-4o-mini). "
+            "Exemplos: openai:gpt-4o, anthropic:claude-3-5-sonnet-20241022, "
+            "groq:llama-3.3-70b-versatile, google:gemini-2.0-flash-exp"
+        ),
     )
     parser.add_argument(
         "--task",
@@ -335,7 +379,7 @@ Notas:
     args = parser.parse_args()
 
     # Validações
-    if not validate_api_key():
+    if not validate_api_key(args.model):
         sys.exit(1)
 
     # Resolve path para absoluto (cross-platform)
@@ -381,7 +425,7 @@ Notas:
     # Configurar callbacks
     callback = CallbackHandler()
     langfuse = get_client()
-    config = {"callbacks": [callback]}
+    config = {"callbacks": [callback], "recursion_limit": 1000}
 
     # Rastrear última tool chamada
     last_tool_name = None

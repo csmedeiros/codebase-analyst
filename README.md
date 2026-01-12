@@ -17,7 +17,7 @@ Execute de qualquer diretório após instalação!
 
 - Python 3.9 ou superior
 - pip (gerenciador de pacotes Python)
-- Chave de API da OpenAI
+- Chave de API de pelo menos um provedor LLM suportado (OpenAI, Anthropic, Groq, Google, etc.)
 
 ## Instalação Rápida
 
@@ -61,34 +61,60 @@ pip install -e .
 
 ## Configuração
 
-### Obter Chave da API OpenAI
+### Obter Chaves de API
 
+O agente suporta múltiplos provedores de LLM. Escolha pelo menos um:
+
+**OpenAI:**
 1. Acesse [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-2. Adicione saldo na API
-3. Crie uma nova chave API
-4. Copie a chave (começa com `sk-...`)
+2. Crie uma nova chave API
+3. Copie a chave (começa com `sk-...`)
 
-### Configurar a Chave
+**Anthropic (Claude):**
+1. Acesse [https://console.anthropic.com/](https://console.anthropic.com/)
+2. Crie uma chave API
+3. Copie a chave
+
+**Groq:**
+1. Acesse [https://console.groq.com/](https://console.groq.com/)
+2. Crie uma chave API
+3. Copie a chave
+
+**Google (Gemini):**
+1. Acesse [https://ai.google.dev/](https://ai.google.dev/)
+2. Obtenha uma chave API
+3. Copie a chave
+
+### Configurar as Chaves
 
 **Opção 1: Arquivo .env (Recomendado)**
 ```bash
 # Copie o template
 cp .env.example .env
 
-# Edite o arquivo .env e adicione:
+# Edite o arquivo .env e adicione as chaves dos provedores que você vai usar:
 # OPENAI_API_KEY=sk-sua-chave-aqui
+# ANTHROPIC_API_KEY=sk-ant-sua-chave-aqui
+# GROQ_API_KEY=gsk_sua-chave-aqui
+# GOOGLE_API_KEY=sua-chave-aqui
 ```
 
-**Opção 2: Variável de Ambiente**
+**Opção 2: Variáveis de Ambiente**
 ```bash
 # Mac/Linux
 export OPENAI_API_KEY=sk-sua-chave-aqui
+export ANTHROPIC_API_KEY=sk-ant-sua-chave-aqui
+export GROQ_API_KEY=gsk_sua-chave-aqui
 
 # Windows (PowerShell)
 $env:OPENAI_API_KEY="sk-sua-chave-aqui"
+$env:ANTHROPIC_API_KEY="sk-ant-sua-chave-aqui"
+$env:GROQ_API_KEY="gsk_sua-chave-aqui"
 
 # Windows (CMD)
 set OPENAI_API_KEY=sk-sua-chave-aqui
+set ANTHROPIC_API_KEY=sk-ant-sua-chave-aqui
+set GROQ_API_KEY=gsk_sua-chave-aqui
 ```
 
 ## Uso
@@ -123,15 +149,28 @@ codebase-analyst ./meu-projeto --task readme
 codebase-analyst ./meu-projeto --task architecture
 ```
 
-**Usar modelo GPT-4:**
+**Usar diferentes modelos e provedores:**
 ```bash
+# OpenAI GPT-4
+codebase-analyst ./meu-projeto --model openai:gpt-4o
+
+# Anthropic Claude
+codebase-analyst ./meu-projeto --model anthropic:claude-3-5-sonnet-20241022
+
+# Groq Llama
+codebase-analyst ./meu-projeto --model groq:llama-3.3-70b-versatile
+
+# Google Gemini
+codebase-analyst ./meu-projeto --model google:gemini-2.0-flash-exp
+
+# Modelo sem especificar provedor (usa OpenAI por padrão)
 codebase-analyst ./meu-projeto --model gpt-4o
 ```
 
 **Analisar qualquer pasta de qualquer lugar:**
 ```bash
 cd ~/Documents
-codebase-analyst ~/Projects/meu-app --task readme
+codebase-analyst ~/Projects/meu-app --task readme --model anthropic:claude-3-5-sonnet-20241022
 ```
 
 ### Opções Disponíveis
@@ -140,9 +179,21 @@ codebase-analyst ~/Projects/meu-app --task readme
 |-------|-----------|--------|
 | `path` | Caminho do repositório a analisar | `.` (diretório atual) |
 | `--task` | Tipo de tarefa: `analyze`, `readme`, `architecture` | `analyze` |
-| `--model` | Modelo OpenAI a usar | `gpt-4o-mini` |
+| `--model` | Modelo no formato `provider:model` ou apenas `model`<br>Exemplos: `openai:gpt-4o`, `anthropic:claude-3-5-sonnet-20241022`,<br>`groq:llama-3.3-70b-versatile`, `google:gemini-2.0-flash-exp` | `gpt-4o-mini` |
 | `--version` | Mostra a versão do programa | - |
 | `--help` | Mostra mensagem de ajuda | - |
+
+### Provedores Suportados
+
+| Provedor | Formato | Variável de Ambiente | Exemplo de Modelo |
+|----------|---------|---------------------|-------------------|
+| OpenAI | `openai:model` | `OPENAI_API_KEY` | `openai:gpt-4o` |
+| Anthropic | `anthropic:model` | `ANTHROPIC_API_KEY` | `anthropic:claude-3-5-sonnet-20241022` |
+| Groq | `groq:model` | `GROQ_API_KEY` | `groq:llama-3.3-70b-versatile` |
+| Google | `google:model` | `GOOGLE_API_KEY` | `google:gemini-2.0-flash-exp` |
+| Cohere | `cohere:model` | `COHERE_API_KEY` | `cohere:command-r-plus` |
+| Mistral | `mistral:model` | `MISTRAL_API_KEY` | `mistral:mistral-large-latest` |
+| Together AI | `together:model` | `TOGETHER_API_KEY` | `together:meta-llama/Llama-3-70b-chat-hf` |
 
 ## Proteção de Sobrescrita
 
@@ -213,10 +264,10 @@ Lê o conteúdo de um arquivo de texto, opcionalmente apenas um intervalo de lin
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `path` | str | Caminho do arquivo a ser lido |
-| `start` | int | Linha inicial (1-indexed, padrão: 1) |
-| `end` | int \| None | Linha final (1-indexed, inclusive). Se omitido, lê até o final |
+| `start` | int | Linha inicial (1-indexed para input, padrão: 1) |
+| `end` | int \| None | Linha final (1-indexed para input, inclusive). Se omitido, lê até o final |
 
-O retorno inclui números de linha no formato `N: conteúdo` e um header com o total de linhas do arquivo.
+O retorno inclui números de linha estilo VS Code (0-indexed, alinhados à esquerda) no formato `N     conteúdo` e um header com o total de linhas do arquivo.
 
 **Exemplo de uso pelo agente:**
 ```python

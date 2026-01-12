@@ -193,14 +193,20 @@ def main():
 Exemplos de uso:
   python main.py ./meu-projeto --task analyze
   python main.py ./meu-projeto --task readme
-  python main.py ./meu-projeto --task architecture --model gpt-4o
+  python main.py ./meu-projeto --task architecture --model openai:gpt-4o
+  python main.py ./meu-projeto --task readme --model anthropic:claude-3-5-sonnet-20241022
+  python main.py ./meu-projeto --task analyze --model groq:llama-3.3-70b-versatile
         """,
     )
     parser.add_argument("path", help="Caminho do repositório a analisar")
     parser.add_argument(
         "--model",
         default="gpt-4o-mini",
-        help="Modelo OpenAI a usar (default: gpt-4o-mini)",
+        help=(
+            "Modelo a usar no formato 'provider:model' ou apenas 'model' (default: gpt-4o-mini). "
+            "Exemplos: openai:gpt-4o, anthropic:claude-3-5-sonnet-20241022, "
+            "groq:llama-3.3-70b-versatile, google:gemini-2.0-flash-exp"
+        ),
     )
     parser.add_argument(
         "--task",

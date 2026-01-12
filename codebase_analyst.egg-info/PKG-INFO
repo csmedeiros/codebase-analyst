@@ -1,0 +1,240 @@
+Metadata-Version: 2.4
+Name: codebase-analyst
+Version: 1.0.0
+Summary: AI-powered codebase analysis and documentation generator
+Author: Codebase Analyst Team
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/codebase-analyst
+Project-URL: Documentation, https://github.com/yourusername/codebase-analyst#readme
+Project-URL: Repository, https://github.com/yourusername/codebase-analyst
+Project-URL: Issues, https://github.com/yourusername/codebase-analyst/issues
+Keywords: codebase,analysis,documentation,ai,langchain
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Documentation
+Classifier: Topic :: Software Development :: Code Generators
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: OS Independent
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: POSIX :: Linux
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: langchain>=0.3.0
+Requires-Dist: langchain-openai>=0.3.0
+Requires-Dist: langgraph>=0.2.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: langfuse>=2.0.0
+Dynamic: requires-python
+
+# Codebase Analyst Agent
+
+Um agente inteligente de análise de código construído com LangChain e LangGraph. O agente navega em repositórios de código, analisa sua estrutura e gera documentação automaticamente.
+
+Execute de qualquer diretório após instalação!
+
+## Funcionalidades
+
+- **Análise de Codebase**: Explora a estrutura do projeto e fornece um resumo técnico completo
+- **Geração de README**: Cria um README.md profissional baseado na análise do código
+- **Documentação de Arquitetura**: Documenta a arquitetura do sistema em detalhes
+- **CLI Instalável**: Execute de qualquer pasta após instalação
+- **Cross-Platform**: Compatível com Mac, Windows e Linux
+
+## Requisitos
+
+- Python 3.9 ou superior
+- pip (gerenciador de pacotes Python)
+- Chave de API da OpenAI
+
+## Instalação Rápida
+
+### Opção 1: Script Automático (Recomendado)
+
+**Mac/Linux:**
+```bash
+cd codebase-analyst
+chmod +x install.sh
+./install.sh
+```
+
+**Windows:**
+```cmd
+cd codebase-analyst
+install.bat
+```
+
+### Opção 2: Instalação Manual
+
+**1. Navegue até a pasta do projeto:**
+```bash
+cd codebase-analyst
+```
+
+**2. (Opcional) Crie um ambiente virtual:**
+```bash
+# Mac/Linux
+python3 -m venv venv
+source venv/bin/activate
+
+# Windows
+python -m venv venv
+venv\Scripts\activate
+```
+
+**3. Instale o pacote:**
+```bash
+pip install -e .
+```
+
+## Configuração
+
+### Obter Chave da API OpenAI
+
+1. Acesse [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+2. Crie uma nova chave API
+3. Copie a chave (começa com `sk-...`)
+
+### Configurar a Chave
+
+**Opção 1: Arquivo .env (Recomendado)**
+```bash
+# Copie o template
+cp .env.example .env
+
+# Edite o arquivo .env e adicione:
+# OPENAI_API_KEY=sk-sua-chave-aqui
+```
+
+**Opção 2: Variável de Ambiente**
+```bash
+# Mac/Linux
+export OPENAI_API_KEY=sk-sua-chave-aqui
+
+# Windows (PowerShell)
+$env:OPENAI_API_KEY="sk-sua-chave-aqui"
+
+# Windows (CMD)
+set OPENAI_API_KEY=sk-sua-chave-aqui
+```
+
+## Uso
+
+Após a instalação, o comando `codebase-analyst` estará disponível globalmente:
+
+### Sintaxe Básica
+
+```bash
+codebase-analyst [CAMINHO] [OPÇÕES]
+```
+
+### Exemplos
+
+**Analisar o diretório atual:**
+```bash
+codebase-analyst .
+```
+
+**Analisar um projeto específico:**
+```bash
+codebase-analyst ~/projetos/meu-app
+```
+
+**Gerar README.md:**
+```bash
+codebase-analyst ./meu-projeto --task readme
+```
+
+**Documentar arquitetura:**
+```bash
+codebase-analyst ./meu-projeto --task architecture
+```
+
+**Usar modelo GPT-4:**
+```bash
+codebase-analyst ./meu-projeto --model gpt-4o
+```
+
+**Analisar qualquer pasta de qualquer lugar:**
+```bash
+cd ~/Documents
+codebase-analyst ~/Projects/meu-app --task readme
+```
+
+### Opções Disponíveis
+
+| Opção | Descrição | Padrão |
+|-------|-----------|--------|
+| `path` | Caminho do repositório a analisar | `.` (diretório atual) |
+| `--task` | Tipo de tarefa: `analyze`, `readme`, `architecture` | `analyze` |
+| `--model` | Modelo OpenAI a usar | `gpt-4o-mini` |
+| `--version` | Mostra a versão do programa | - |
+| `--help` | Mostra mensagem de ajuda | - |
+
+## Estrutura do Projeto
+
+```
+codebase-analyst/
+├── src/
+│   ├── __init__.py       # Inicialização do pacote
+│   ├── agent.py          # Configuração do agente LangGraph
+│   ├── tools.py          # Ferramentas do agente (list_dir, read_file, write_file)
+│   └── prompts.py        # System prompt do agente
+├── main.py               # Entry point com CLI
+├── requirements.txt      # Dependências do projeto
+└── README.md             # Este arquivo
+```
+
+## Ferramentas do Agente
+
+O agente possui três ferramentas para interagir com o sistema de arquivos:
+
+### `list_dir(path)`
+Lista o conteúdo de um diretório, mostrando arquivos e subdiretórios com prefixos `[FILE]` e `[DIR]`.
+
+### `read_file(path, start, end)`
+Lê o conteúdo de um arquivo de texto, opcionalmente apenas um intervalo de linhas.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `path` | str | Caminho do arquivo a ser lido |
+| `start` | int | Linha inicial (1-indexed, padrão: 1) |
+| `end` | int \| None | Linha final (1-indexed, inclusive). Se omitido, lê até o final |
+
+O retorno inclui números de linha no formato `N: conteúdo` e um header com o total de linhas do arquivo.
+
+**Exemplo de uso pelo agente:**
+```python
+# Ler primeiras 50 linhas
+read_file("src/main.py", start=1, end=50)
+
+# Ler linhas 100-200
+read_file("src/main.py", start=100, end=200)
+
+# Ler arquivo inteiro
+read_file("README.md")
+```
+
+### `write_file(path, content)`
+Cria ou sobrescreve arquivos, criando diretórios pai automaticamente se necessário.
+
+## Arquitetura
+
+O projeto utiliza:
+
+- **LangChain**: Framework para construção de aplicações com LLMs
+- **LangGraph**: Biblioteca para criação de agentes com grafos de estado
+- **OpenAI API**: Modelos de linguagem para análise e geração de texto
+- **pathlib**: Manipulação cross-platform de caminhos de arquivo
+
+## Notas Técnicas
+
+- Todas as operações de arquivo usam `pathlib` para compatibilidade cross-platform
+- Encoding UTF-8 é usado em todas as operações de leitura/escrita
+- O agente usa temperatura baixa (0.1) para outputs mais consistentes
+- Streaming está habilitado para visualizar o progresso em tempo real

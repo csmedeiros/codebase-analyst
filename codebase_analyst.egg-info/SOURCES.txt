@@ -1,0 +1,17 @@
+.env.example
+MANIFEST.in
+README.md
+pyproject.toml
+requirements.txt
+setup.py
+codebase_analyst.egg-info/PKG-INFO
+codebase_analyst.egg-info/SOURCES.txt
+codebase_analyst.egg-info/dependency_links.txt
+codebase_analyst.egg-info/entry_points.txt
+codebase_analyst.egg-info/requires.txt
+codebase_analyst.egg-info/top_level.txt
+src/__init__.py
+src/agent.py
+src/cli.py
+src/prompts.py
+src/tools.py

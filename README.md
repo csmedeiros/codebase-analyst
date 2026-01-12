@@ -65,7 +65,8 @@ pip install -e .
 
 1. Acesse [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 2. Crie uma nova chave API
-3. Copie a chave (começa com `sk-...`)
+3. Adicione saldo na API
+4. Copie a chave (começa com `sk-...`)
 
 ### Configurar a Chave
 

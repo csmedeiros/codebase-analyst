@@ -170,7 +170,7 @@ codebase-analyst ./meu-projeto --model gpt-4o
 **Analisar qualquer pasta de qualquer lugar:**
 ```bash
 cd ~/Documents
-codebase-analyst ~/Projects/meu-app --task readme --model anthropic:claude-3-5-sonnet-20241022
+codebase-analyst ~/Projects/meu-app --task onboarding --model anthropic:claude-3-5-sonnet
 ```
 
 ### Opções Disponíveis
@@ -178,7 +178,7 @@ codebase-analyst ~/Projects/meu-app --task readme --model anthropic:claude-3-5-s
 | Opção | Descrição | Padrão |
 |-------|-----------|--------|
 | `path` | Caminho do repositório a analisar | `.` (diretório atual) |
-| `--task` | Tipo de tarefa: `analyze`, `readme`, `architecture` | `analyze` |
+| `--task` | Tipo de tarefa: `analyze`, `onboarding` |
 | `--model` | Modelo no formato `provider:model` ou apenas `model`<br>Exemplos: `openai:gpt-4o`, `anthropic:claude-3-5-sonnet-20241022`,<br>`groq:llama-3.3-70b-versatile`, `google:gemini-2.0-flash-exp` | `gpt-4o-mini` |
 | `--version` | Mostra a versão do programa | - |
 | `--help` | Mostra mensagem de ajuda | - |
@@ -199,7 +199,7 @@ codebase-analyst ~/Projects/meu-app --task readme --model anthropic:claude-3-5-s
 
 O Codebase Analyst protege seus arquivos existentes! 🛡️
 
-Quando você executa tarefas que geram arquivos (`--task readme` ou `--task architecture`), o CLI automaticamente:
+Quando você executa tarefas que geram arquivos (`--task onboarding` ou `--task analysis`), o CLI automaticamente:
 
 1. **Detecta** se o arquivo já existe no diretório
 2. **Mostra informações** sobre o arquivo existente (caminho, tamanho, data de modificação)
@@ -209,11 +209,11 @@ Quando você executa tarefas que geram arquivos (`--task readme` ou `--task arch
 ### Exemplo
 
 ```bash
-$ codebase-analyst ./meu-projeto --task readme
+$ codebase-analyst ./meu-projeto --task onboarding
 
-⚠ Aviso: O arquivo 'README.md' já existe no diretório!
+⚠ Aviso: O arquivo 'ONBOARDING.md' já existe no diretório!
 
-Arquivo:     /caminho/para/meu-projeto/README.md
+Arquivo:     /caminho/para/meu-projeto/ONBOARDING.md
 Tamanho:     2048 bytes
 Modificado:  2026-01-12 08:30:45
 
@@ -231,8 +231,7 @@ Deseja continuar e sobrescrever o arquivo? [s/N]:
 
 | Tarefa | Arquivo Protegido |
 |--------|-------------------|
-| `--task readme` | `README.md` |
-| `--task architecture` | `ARCHITECTURE.md` |
+| `--task onboarding` | `ONBOARDING.md` |
 | `--task analyze` | Nenhum (não cria arquivos) |
 
 > 📖 **Documentação completa**: Veja [FEATURE_OVERWRITE_PROTECTION.md](FEATURE_OVERWRITE_PROTECTION.md) para mais detalhes

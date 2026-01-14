@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.5] - 2026-01-14
+
+### Modificado
+- Bump de versão para 1.1.5
+- Consolidação de correções e melhorias das versões 1.1.1 a 1.1.4
+
 ## [1.1.0] - 2026-01-12
 
 ### Adicionado

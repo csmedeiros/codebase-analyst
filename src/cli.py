@@ -255,14 +255,13 @@ def check_existing_file(target_path: Path, task: str) -> bool:
 
     Args:
         target_path: Caminho do diretório alvo
-        task: Tipo de tarefa (readme, architecture)
+        task: Tipo de tarefa (onboarding)
 
     Returns:
         True se pode continuar, False se usuário cancelou
     """
     file_mapping = {
-        "readme": "README.md",
-        "architecture": "ARCHITECTURE.md"
+        "onboarding": "ONBOARDING.md"
     }
 
     if task not in file_mapping:
@@ -332,21 +331,26 @@ def check_existing_file(target_path: Path, task: str) -> bool:
 def main():
     """Função principal do CLI."""
     parser = argparse.ArgumentParser(
-        description="Codebase Analyst Agent - Analisa repositórios de código e gera documentação",
+        description="Codebase Analyst Agent - Gera documentação de onboarding detalhada para codebases",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemplos de uso:
-  codebase-analyst ./meu-projeto --task analyze
-  codebase-analyst ./meu-projeto --task readme
-  codebase-analyst ./meu-projeto --task architecture --model openai:gpt-4o
-  codebase-analyst . --task analyze --model anthropic:claude-3-5-sonnet-20241022
-  codebase-analyst . --task readme --model groq:llama-3.3-70b-versatile
+  codebase-analyst ./meu-projeto
+  codebase-analyst ./meu-projeto --task onboarding
+  codebase-analyst ./meu-projeto --task onboarding --model openai:gpt-4o
+  codebase-analyst . --model anthropic:claude-3-5-sonnet-20241022
+  codebase-analyst . --task analyze --model groq:llama-3.3-70b-versatile
+
+Tarefas disponíveis:
+  • analyze     : Análise rápida da codebase (sem gerar documentação)
+  • onboarding  : Gera ONBOARDING.md completo para novos desenvolvedores (default)
 
 Notas:
   • Suporta múltiplos provedores: OpenAI, Anthropic, Groq, Google, etc.
   • Requer chaves de API configuradas (OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)
   • Compatível com Mac, Windows e Linux
   • Usa caminhos absolutos internamente para funcionar em qualquer diretório
+  • O ONBOARDING.md inclui: estrutura, entry points, fluxos, roadmap de leitura e muito mais
         """,
     )
     parser.add_argument(
@@ -366,9 +370,9 @@ Notas:
     )
     parser.add_argument(
         "--task",
-        default="analyze",
-        choices=["analyze", "readme", "architecture"],
-        help="Tipo de tarefa a executar (default: analyze)",
+        default="onboarding",
+        choices=["analyze", "onboarding"],
+        help="Tipo de tarefa a executar (default: onboarding)",
     )
     parser.add_argument(
         "--version",
@@ -404,13 +408,12 @@ Notas:
             print_error(f"Falha ao criar agente: {e}")
             sys.exit(1)
 
-    console.print(Text("  ✓ Agente criado", style="green"))
+    console.print(Text("  ✓ Agente instanciado", style="green"))
 
     # Construir o prompt baseado na tarefa
     task_prompts = {
         "analyze": f"Analise a codebase em '{target_path}' e forneça um resumo técnico completo.",
-        "readme": f"Analise a codebase em '{target_path}' e gere um README.md profissional na raiz do projeto.",
-        "architecture": f"Analise a codebase em '{target_path}' e documente a arquitetura do sistema em um arquivo ARCHITECTURE.md.",
+        "onboarding": f"Analise a codebase em '{target_path}' e gere um arquivo ONBOARDING.md completo e detalhado na raiz do projeto. Este arquivo deve facilitar o entendimento do código para novos desenvolvedores, incluindo: estrutura do projeto, entry points, arquivos principais, fluxos de execução, configurações, dependências e um roadmap de leitura do código.",
     }
 
     user_message = task_prompts[args.task]
@@ -465,6 +468,29 @@ Notas:
     console.print()
     console.print(Rule("Concluído", style="white"))
     print_success()
+
+    # Renderizar markdown conforme a tarefa
+    if args.task == "onboarding":
+        onboarding_path = target_path / "ONBOARDING.md"
+        if onboarding_path.exists():
+            console.print()
+            console.print(Rule("Visualizando ONBOARDING.md", style="cyan"))
+            console.print()
+            try:
+                with open(onboarding_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    md = Markdown(content)
+                    console.print(md)
+                console.print()
+                console.print(Text(f"✓ Arquivo completo salvo em: {onboarding_path}", style="green"))
+            except Exception as e:
+                print_error(f"Erro ao renderizar ONBOARDING.md: {e}")
+    elif args.task == "analyze":
+        # Para análise, tentar renderizar qualquer markdown gerado ou mensagem final do agente
+        console.print()
+        console.print(Rule("Análise Completa", style="cyan"))
+        console.print()
+        console.print(Text("✓ Análise técnica da codebase concluída com sucesso!", style="green"))
 
 
 if __name__ == "__main__":

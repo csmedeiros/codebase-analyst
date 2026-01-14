@@ -1,2 +1,0 @@
-[console_scripts]
-codebase-analyst = src.cli:main

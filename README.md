@@ -1,5 +1,7 @@
 # Codebase Analyst Agent
 
+**Versão 1.1.5**
+
 Um agente inteligente de análise de código construído com LangChain e LangGraph. O agente navega em repositórios de código, analisa sua estrutura e gera documentação automaticamente.
 
 Execute de qualquer diretório após instalação!
@@ -7,11 +9,13 @@ Execute de qualquer diretório após instalação!
 ## Funcionalidades
 
 - **Análise de Codebase**: Explora a estrutura do projeto e fornece um resumo técnico completo
-- **Geração de README**: Cria um README.md profissional baseado na análise do código
+- **Geração de Onboarding**: Cria documentação ONBOARDING.md profissional baseada na análise do código
 - **Documentação de Arquitetura**: Documenta a arquitetura do sistema em detalhes
+- **Gerenciamento de Contexto**: SummarizationMiddleware para compressão automática de contexto
 - **Proteção de Sobrescrita**: Detecta arquivos existentes e solicita confirmação antes de sobrescrever
 - **CLI Instalável**: Execute de qualquer pasta após instalação
 - **Cross-Platform**: Compatível com Mac, Windows e Linux
+- **Multi-Provider**: Suporte a 7 provedores de LLM (OpenAI, Anthropic, Groq, Google, Cohere, Mistral, Together AI)
 
 ## Requisitos
 
@@ -242,18 +246,24 @@ Deseja continuar e sobrescrever o arquivo? [s/N]:
 ```
 codebase-analyst/
 ├── src/
-│   ├── __init__.py       # Inicialização do pacote
-│   ├── agent.py          # Configuração do agente LangGraph
-│   ├── tools.py          # Ferramentas do agente (list_dir, read_file, write_file)
-│   └── prompts.py        # System prompt do agente
-├── main.py               # Entry point com CLI
-├── requirements.txt      # Dependências do projeto
-└── README.md             # Este arquivo
+│   ├── __init__.py          # Inicialização do pacote (v1.1.5)
+│   ├── agent.py             # Configuração do agente LangGraph
+│   ├── cli.py               # Entry point CLI principal
+│   ├── tools.py             # Ferramentas do agente (list_dir, read_file, write_file, remove_draft_file)
+│   ├── prompts.py           # Prompts do agente
+│   ├── summarization.py     # SummarizationMiddleware para gerenciamento de contexto
+│   └── system_prompt.md     # System prompt detalhado do agente
+├── main.py                  # Entry point alternativo
+├── pyproject.toml           # Configuração moderna do pacote Python
+├── setup.py                 # Configuração de instalação
+├── requirements.txt         # Dependências do projeto
+├── install.sh / install.bat # Scripts de instalação automática
+└── README.md                # Este arquivo
 ```
 
 ## Ferramentas do Agente
 
-O agente possui três ferramentas para interagir com o sistema de arquivos:
+O agente possui quatro ferramentas para interagir com o sistema de arquivos:
 
 ### `list_dir(path)`
 Lista o conteúdo de um diretório, mostrando arquivos e subdiretórios com prefixos `[FILE]` e `[DIR]`.
@@ -284,13 +294,18 @@ read_file("README.md")
 ### `write_file(path, content)`
 Cria ou sobrescreve arquivos, criando diretórios pai automaticamente se necessário.
 
+### `remove_draft_file(path)`
+Remove o arquivo DRAFT.md (usado internamente pelo agente para memória de trabalho).
+
 ## Arquitetura
 
 O projeto utiliza:
 
 - **LangChain**: Framework para construção de aplicações com LLMs
 - **LangGraph**: Biblioteca para criação de agentes com grafos de estado
-- **OpenAI API**: Modelos de linguagem para análise e geração de texto
+- **Multi-Provider LLM**: Suporte a OpenAI, Anthropic, Groq, Google, Cohere, Mistral e Together AI
+- **Rich**: Interface de terminal com formatação rica
+- **SummarizationMiddleware**: Gerenciamento inteligente de contexto para evitar overflow de tokens
 - **pathlib**: Manipulação cross-platform de caminhos de arquivo
 
 ## Notas Técnicas
@@ -299,3 +314,13 @@ O projeto utiliza:
 - Encoding UTF-8 é usado em todas as operações de leitura/escrita
 - O agente usa temperatura baixa (0.1) para outputs mais consistentes
 - Streaming está habilitado para visualizar o progresso em tempo real
+- SummarizationMiddleware comprime contexto antigo quando próximo do limite de tokens
+- Fluxo de trabalho em duas fases: exploração + análise profunda
+
+## Changelog
+
+Veja [CHANGELOG.md](CHANGELOG.md) para histórico completo de versões.
+
+## Licença
+
+MIT License - veja [LICENSE](LICENSE) para detalhes.

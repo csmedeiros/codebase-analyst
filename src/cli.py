@@ -361,7 +361,7 @@ Notas:
     )
     parser.add_argument(
         "--model",
-        default="gpt-5-mini",
+        default="anthropic:claude-sonnet-4-5",
         help=(
             "Modelo a usar no formato 'provider:model' ou apenas 'model' (default: gpt-4o-mini). "
             "Exemplos: openai:gpt-4o, anthropic:claude-3-5-sonnet-20241022, "

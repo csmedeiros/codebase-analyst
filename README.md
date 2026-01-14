@@ -143,14 +143,10 @@ codebase-analyst .
 codebase-analyst ~/projetos/meu-app
 ```
 
-**Gerar README.md:**
+**Gerar ONBOARDING.md:**
 ```bash
-codebase-analyst ./meu-projeto --task readme
+codebase-analyst ./meu-projeto --task onboarding
 ```
-
-**Documentar arquitetura:**
-```bash
-codebase-analyst ./meu-projeto --task architecture
 ```
 
 **Usar diferentes modelos e provedores:**
@@ -288,7 +284,7 @@ read_file("src/main.py", start=1, end=50)
 read_file("src/main.py", start=100, end=200)
 
 # Ler arquivo inteiro
-read_file("README.md")
+read_file("DRAFT.md")
 ```
 
 ### `write_file(path, content)`

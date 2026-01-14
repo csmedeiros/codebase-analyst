@@ -11,7 +11,7 @@ from .prompts import SYSTEM_PROMPT, SUMMARIZATION_PROMPT
 from .tools import list_dir, read_file, write_file, remove_draft_file
 
 
-def create_codebase_agent(model_name: str = "gpt-5-mini"):
+def create_codebase_agent(model_name: str = "anthropic:claude-sonnet-4-5"):
     """Cria e retorna o agente de análise de codebase.
 
     Args:

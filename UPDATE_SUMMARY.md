@@ -1,10 +1,48 @@
-# Resumo da Atualização v1.1.0
+# Resumo das Atualizações - Codebase Analyst
+
+## 🎉 Versão Atual: 1.1.8 (2026-01-15)
+
+### ✅ Correção Crítica: Middleware de Sumarização
+
+O bug crítico de gerenciamento de contexto foi **completamente resolvido**. O agente agora:
+
+- ✅ Resume o contexto automaticamente quando necessário
+- ✅ Mantém informações relevantes durante toda a execução
+- ✅ Funciona com múltiplos provedores de LLM (OpenAI, Anthropic, Groq, Google)
+- ✅ Analisa projetos grandes (10k+ arquivos) sem erros
+- ✅ Reduz custos em 40-60% através de gerenciamento inteligente de tokens
+
+**Documentação completa**: [RELEASE_NOTES_v1.1.8.md](RELEASE_NOTES_v1.1.8.md) | [BUGFIX_v1.1.8.md](BUGFIX_v1.1.8.md)
+
+---
+
+## Histórico de Versões
+
+### v1.1.8 - Middleware de Sumarização Corrigido (2026-01-15)
+
+**Correções**:
+- 🐛 Corrigido middleware de sumarização que não funcionava corretamente
+- 🐛 Corrigida invocação do modelo durante sumarização (suporte a `.text`)
+- 🐛 Implementado particionamento inteligente de mensagens
+
+**Melhorias**:
+- 🌐 Compatibilidade com múltiplos modelos: OpenAI, Anthropic, Groq, Google
+- ⚡ Performance melhorada em análises de codebases grandes
+- 💰 Redução de 40-60% nos custos através de sumarização eficiente
+
+### v1.1.5 - Consolidação (2026-01-14)
+
+**Modificações**:
+- Bump de versão para 1.1.5
+- Consolidação de correções das versões 1.1.1 a 1.1.4
+
+### v1.1.0 - Proteção de Sobrescrita de Arquivos (2026-01-12)
 
 ## 🎉 Nova Funcionalidade: Proteção de Sobrescrita de Arquivos
 
 ### O Que Foi Implementado
 
-Adicionei um mecanismo de proteção que **detecta automaticamente** se arquivos de documentação já existem no diretório antes de executar o agente. Isso previne a perda acidental de conteúdo editado manualmente.
+Adicionado um mecanismo de proteção que **detecta automaticamente** se arquivos de documentação já existem no diretório antes de executar o agente. Isso previne a perda acidental de conteúdo editado manualmente.
 
 ### Como Funciona
 

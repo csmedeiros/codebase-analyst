@@ -1,6 +1,6 @@
 # Codebase Analyst Agent
 
-**Versão 1.1.5**
+**Versão 1.2.0**
 
 Um agente inteligente de análise de código construído com LangChain e LangGraph. O agente navega em repositórios de código, analisa sua estrutura e gera documentação automaticamente.
 
@@ -12,6 +12,7 @@ Execute de qualquer diretório após instalação!
 - **Geração de Onboarding**: Cria documentação ONBOARDING.md profissional baseada na análise do código
 - **Documentação de Arquitetura**: Documenta a arquitetura do sistema em detalhes
 - **Gerenciamento de Contexto**: SummarizationMiddleware para compressão automática de contexto
+- **Observabilidade Opcional**: Tracing com Langfuse (habilitado via flag `--trace`)
 - **Proteção de Sobrescrita**: Detecta arquivos existentes e solicita confirmação antes de sobrescrever
 - **CLI Instalável**: Execute de qualquer pasta após instalação
 - **Cross-Platform**: Compatível com Mac, Windows e Linux
@@ -173,13 +174,23 @@ cd ~/Documents
 codebase-analyst ~/Projects/meu-app --task onboarding --model anthropic:claude-3-5-sonnet
 ```
 
+**Habilitar tracing com Langfuse:**
+```bash
+# Com tracing para observabilidade
+codebase-analyst ./meu-projeto --trace
+
+# Combinar com outras opções
+codebase-analyst ./meu-projeto --task onboarding --model anthropic:claude-sonnet-4-5 --trace
+```
+
 ### Opções Disponíveis
 
 | Opção | Descrição | Padrão |
 |-------|-----------|--------|
 | `path` | Caminho do repositório a analisar | `.` (diretório atual) |
-| `--task` | Tipo de tarefa: `analyze`, `onboarding` |
-| `--model` | Modelo no formato `provider:model` ou apenas `model`<br>Exemplos: `openai:gpt-4o`, `anthropic:claude-3-5-sonnet-20241022`,<br>`groq:llama-3.3-70b-versatile`, `google:gemini-2.0-flash-exp` | `gpt-4o-mini` |
+| `--task` | Tipo de tarefa: `analyze`, `onboarding` | `onboarding` |
+| `--model` | Modelo no formato `provider:model` ou apenas `model`<br>Exemplos: `openai:gpt-4o`, `anthropic:claude-3-5-sonnet-20241022`,<br>`groq:llama-3.3-70b-versatile`, `google:gemini-2.0-flash-exp` | `anthropic:claude-sonnet-4-5` |
+| `--trace` | Habilita tracing com Langfuse para observabilidade | Desabilitado |
 | `--version` | Mostra a versão do programa | - |
 | `--help` | Mostra mensagem de ajuda | - |
 
@@ -241,20 +252,42 @@ Deseja continuar e sobrescrever o arquivo? [s/N]:
 ```
 codebase-analyst/
 ├── src/
-│   ├── __init__.py          # Inicialização do pacote (v1.1.5)
+│   ├── __init__.py          # Inicialização do pacote (v1.2.0)
 │   ├── agent.py             # Configuração do agente LangGraph
 │   ├── cli.py               # Entry point CLI principal
 │   ├── tools.py             # Ferramentas do agente (list_dir, read_file, write_file, remove_draft_file)
-│   ├── prompts.py           # Prompts do agente
+│   ├── prompts.py           # Carregador de prompts (carrega versões)
 │   ├── summarization.py     # SummarizationMiddleware para gerenciamento de contexto
-│   └── system_prompt.md     # System prompt detalhado do agente
+│   └── prompts/             # Diretório de prompts versionados
+│       ├── system_prompt_v1.1.2.md  # System prompt v1.1.2
+│       └── system_prompt_v1.1.5.md  # System prompt atual (v1.1.5)
 ├── main.py                  # Entry point alternativo
 ├── pyproject.toml           # Configuração moderna do pacote Python
 ├── setup.py                 # Configuração de instalação
 ├── requirements.txt         # Dependências do projeto
 ├── install.sh / install.bat # Scripts de instalação automática
+├── CHANGELOG.md             # Histórico de versões
 └── README.md                # Este arquivo
 ```
+
+### Organização de Prompts
+
+Os prompts do agente estão organizados em versões no diretório `src/prompts/`:
+
+- **System Prompt v1.1.5** (atual): Prompt otimizado com instruções detalhadas para análise de codebase
+  - Análise em duas fases (exploração + análise profunda)
+  - Uso obrigatório do arquivo `DRAFT.md` para memória de trabalho
+  - Validações de completude antes de gerar `ONBOARDING.md`
+  - Classificação arquitetural de componentes-chave
+  - Geração de diagramas ASCII Art para fluxos de execução
+
+- **System Prompt v1.1.2**: Versão anterior mantida para referência
+
+O arquivo `prompts.py` carrega dinamicamente a versão correta do prompt, facilitando:
+- Versionamento claro das instruções do agente
+- Comparação entre versões
+- Rollback se necessário
+- Evolução controlada do comportamento do agente
 
 ## Ferramentas do Agente
 

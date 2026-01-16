@@ -9,7 +9,7 @@ long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="codebase-analyst",
-    version="1.1.5",
+    version="1.2.0",
     description="AI-powered codebase analysis and documentation generator",
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -6,6 +6,7 @@ atual e recomendada do ecossistema LangChain para criação de agentes.
 
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
+from langchain.rate_limiters import InMemoryRateLimiter
 
 from .prompts import SYSTEM_PROMPT, SUMMARIZATION_PROMPT
 from .tools import list_dir, read_file, write_file, remove_draft_file
@@ -42,8 +43,8 @@ def create_codebase_agent(model_name: str = "anthropic:claude-sonnet-4-5"):
     if provider == "openai":
         model_kwargs["frequency_penalty"] = 0.0
         model_kwargs["presence_penalty"] = 0.0
-    if (model.startswith("o") or model.startswith("gpt-5")):
-        model_kwargs["reasoning_effort"] = "medium"
+        if (model.startswith("o") or model.startswith("gpt-5")):
+            model_kwargs["reasoning_effort"] = "medium"
 
 
     # Inicializar o modelo usando init_chat_model
@@ -56,34 +57,36 @@ def create_codebase_agent(model_name: str = "anthropic:claude-sonnet-4-5"):
     # Lista de tools
     tools = [list_dir, read_file, write_file, remove_draft_file]
 
-    from langchain.agents.middleware import TodoListMiddleware, ClearToolUsesEdit, ContextEditingMiddleware
+    from langchain.agents.middleware import TodoListMiddleware, ClearToolUsesEdit, ContextEditingMiddleware, ToolRetryMiddleware
     from .summarization import SummarizationMiddleware
+
     # Criar o agente usando create_react_agent do langgraph
     # Esta é a API atual e recomendada para criação de agentes
     sum_middleware = SummarizationMiddleware(
         model=model,
-        trigger=("tokens", 20000),       # Aumentado: sumariza menos frequentemente
-        keep=("tokens", 10000),          # Aumentado: mantém 50% do contexto após sumarização
-        trim_tokens_to_summarize=5000,   # Aumentado: sumariza com mais informação de contexto
-        summary_prompt=SUMMARIZATION_PROMPT
+        trigger=("fraction", 0.5),       # Aumentado: sumariza menos frequentemente
+        keep=("fraction", 0.2),          # Aumentado: mantém 50% do contexto após sumarização
+        trim_tokens_to_summarize=6000,   # Aumentado: sumariza com mais informação de contexto
+        summary_prompt=SUMMARIZATION_PROMPT,
     )
 
     ctx_edit = ContextEditingMiddleware(
         edits=[
             ClearToolUsesEdit(
-                trigger=6000,          # ajuste conforme teu modelo/uso
+                trigger=2000,          # ajuste conforme teu modelo/uso
                 keep=3,                  # mantém os 3 tool results mais recentes
-                clear_tool_inputs=True, # normalmente você quer manter os args do tool call
+                clear_tool_inputs=False, # normalmente você quer manter os args do tool call
             )
         ],
         token_count_method="approximate",
     )
 
-
+    tool_retry = ToolRetryMiddleware(tools=tools, retry_on=Exception)
     todo_middlware = TodoListMiddleware()
+
     agent = create_agent(
         model=model,
-        middleware=[sum_middleware, ctx_edit, todo_middlware],
+        middleware=[sum_middleware, ctx_edit, todo_middlware, tool_retry],
         tools=tools,
         system_prompt=SYSTEM_PROMPT,
     )

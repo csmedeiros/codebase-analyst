@@ -361,7 +361,7 @@ Notas:
     )
     parser.add_argument(
         "--model",
-        default="anthropic:claude-sonnet-4-5",
+        default="anthropic: claude-sonnet-4-5",
         help=(
             "Modelo a usar no formato 'provider:model' ou apenas 'model' (default: gpt-4o-mini). "
             "Exemplos: openai:gpt-4o, anthropic:claude-3-5-sonnet-20241022, "
@@ -375,9 +375,14 @@ Notas:
         help="Tipo de tarefa a executar (default: onboarding)",
     )
     parser.add_argument(
+        "--trace",
+        action="store_true",
+        help="Habilita tracing com Langfuse para observabilidade (default: desabilitado)",
+    )
+    parser.add_argument(
         "--version",
         action="version",
-        version="codebase-analyst 1.1.0",
+        version="codebase-analyst 1.2.0",
     )
 
     args = parser.parse_args()
@@ -425,10 +430,16 @@ Notas:
     console.print(Text("◇ Prompt", style="cyan"))
     console.print(Text(f"  {user_message}", style="italic white"))
 
-    # Configurar callbacks
-    callback = CallbackHandler()
-    langfuse = get_client()
-    config = {"callbacks": [callback], "recursion_limit": 1000}
+    # Configurar callbacks (somente se --trace estiver ativado)
+    if args.trace:
+        callback = CallbackHandler()
+        langfuse = get_client()
+        config = {"callbacks": [callback], "recursion_limit": 1000}
+        console.print(Text("  ✓ Tracing com Langfuse habilitado", style="yellow"))
+    else:
+        langfuse = None
+        config = {"recursion_limit": 1000}
+        console.print(Text("  ℹ Tracing desabilitado (use --trace para habilitar)", style="white"))
 
     # Rastrear última tool chamada
     last_tool_name = None
@@ -455,7 +466,10 @@ Notas:
                     msg = data["messages"][-1]
                     content = str(msg.content) if hasattr(msg, "content") else str(msg)
                     print_tool_result(content, tool_name=last_tool_name)
-                langfuse.flush()
+
+                # Flush Langfuse somente se estiver habilitado
+                if langfuse:
+                    langfuse.flush()
 
     except KeyboardInterrupt:
         print_cancelled()

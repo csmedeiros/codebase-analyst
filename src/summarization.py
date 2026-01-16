@@ -525,7 +525,7 @@ class SummarizationMiddleware(AgentMiddleware):
                     messages,
                     max_tokens=self.trim_tokens_to_summarize,
                     token_counter=self.token_counter,
-                    start_on="ai",
+                    start_on=["human", "ai", "tool"],
                     strategy="last",
                     allow_partial=True,
                     include_system=True,

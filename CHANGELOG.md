@@ -1,5 +1,79 @@
 # Changelog
 
+## [1.2.0] - 2026-01-16
+
+### Adicionado
+- **Flag `--trace` para Observabilidade**: Nova flag opcional para habilitar tracing com Langfuse
+  - Por padrão, o tracing está **desabilitado** para melhor performance
+  - Quando habilitado com `--trace`, permite observabilidade completa via Langfuse
+  - Feedback visual no CLI indicando status do tracing (habilitado/desabilitado)
+  - Flush do Langfuse condicionado à flag para evitar overhead desnecessário
+  - Documentação completa no README.md com exemplos de uso
+
+### Modificado
+- **Organização de Prompts**: System prompts agora organizados em versões
+  - Prompts movidos para diretório `src/prompts/`
+  - System prompt atual: `system_prompt_v1.1.5.md`
+  - Arquivo `prompts.py` carrega dinamicamente o prompt versionado
+  - Facilita manutenção e tracking de mudanças nos prompts ao longo do tempo
+- **Modelo Padrão**: Alterado de `gpt-4o-mini` para `anthropic:claude-sonnet-4-5`
+  - Melhor desempenho em análises de codebase complexas
+  - Suporte a contextos maiores
+  - Mantida compatibilidade com todos os 7 provedores
+- **README.md**: Atualizado com documentação da flag `--trace` e novos defaults
+
+### Técnico
+- Inicialização condicional do `CallbackHandler` do Langfuse em [cli.py:429-442](src/cli.py#L429-L442)
+- Flush condicional do Langfuse client em [cli.py:460-461](src/cli.py#L460-L461)
+- Carregamento dinâmico de prompts em [prompts.py:132](src/prompts.py#L132)
+- Estrutura de versionamento de prompts em `src/prompts/`
+
+### Impacto
+- ✅ Melhor performance quando tracing não é necessário (padrão)
+- ✅ Observabilidade completa disponível sob demanda
+- ✅ Facilita debugging e análise de execuções com Langfuse
+- ✅ Organização clara de prompts permite evolução controlada
+- ✅ Mantém compatibilidade total com versões anteriores
+
+## [1.1.8] - 2026-01-15
+
+### Corrigido
+- **Middleware de Sumarização Corrigido**: Corrigido bug crítico no middleware de resumo que impedia o contexto de ser gerido corretamente
+  - Implementada classe `SummarizationMiddleware` customizada que substitui a implementação padrão do LangChain
+  - Corrigida invocação do modelo durante a sumarização: adicionado suporte correto ao atributo `.text` do response
+  - Ajustados parâmetros de trigger e keep para garantir sumarização eficiente:
+    - `trigger=("fraction", 0.5)` - Sumariza quando atinge 50% do contexto máximo
+    - `keep=("fraction", 0.2)` - Mantém 20% do contexto mais recente após sumarização
+    - `trim_tokens_to_summarize=6000` - Sumariza com 6000 tokens de contexto
+  - Sistema agora particiona corretamente mensagens entre as que devem ser sumarizadas e as que devem ser preservadas
+  - Implementado tratamento correto de pares AI/Tool messages para evitar quebra de contexto
+
+### Melhorado
+- **Compatibilidade Multi-Modelo**: O agente agora funciona corretamente com múltiplos provedores de LLM, não apenas Claude Sonnet 4.5
+  - Suporte completo para modelos OpenAI (GPT-4o, GPT-4o-mini, o1, o3, GPT-5)
+  - Suporte para modelos Anthropic (Claude 3.5 Sonnet, Claude 3 Opus)
+  - Suporte para modelos Groq (Llama 3.3 70B e outros)
+  - Suporte para modelos Google (Gemini 2.0 Flash)
+  - Ajuste automático de `chars_per_token` para modelos Anthropic (3.3) para contagem precisa de tokens
+  - Adicionado parâmetro `reasoning_effort="medium"` para modelos OpenAI o1/o3/GPT-5
+
+### Técnico
+- Middleware `SummarizationMiddleware` implementado em [src/summarization.py](src/summarization.py)
+  - Métodos síncronos (`before_model`) e assíncronos (`abefore_model`) implementados
+  - Sistema de particionamento de mensagens com binary search para eficiência
+  - Trimming inteligente de mensagens para sumarização com estratégia "last"
+  - Validação robusta de configurações de `ContextSize` (fraction, tokens, messages)
+  - Geração de IDs únicos para mensagens quando necessário
+- Sistema de contagem de tokens otimizado por tipo de modelo
+- Prompt de sumarização customizado focado em extração de contexto relevante
+
+### Impacto
+- ✅ Agente agora mantém contexto de longo prazo corretamente em todas as execuções
+- ✅ Redução significativa no uso de tokens através de sumarização eficiente
+- ✅ Compatibilidade com qualquer modelo de LLM que suporte function calling
+- ✅ Performance melhorada em análises de codebases grandes (10k+ arquivos)
+- ✅ Custos reduzidos através de gerenciamento inteligente de contexto
+
 ## [1.1.5] - 2026-01-14
 
 ### Modificado

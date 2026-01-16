@@ -1,17 +1,46 @@
 # Correções para Loop Infinito no Agente de Análise de Codebase
 
-## Problema Identificado
+## ✅ CORRIGIDO NA VERSÃO 1.1.8 (2026-01-15)
 
-O agente está entrando em loop infinito devido a três problemas principais:
+O problema de loop infinito e perda de contexto foi **completamente resolvido** na versão 1.1.8 através da implementação de um middleware de sumarização customizado.
 
-1. **Sumarização muito agressiva**: O middleware de sumarização está configurado para manter apenas 4000 tokens, o que é insuficiente para o agente lembrar o progresso da análise.
+### Correção Implementada
 
-2. **Perda de contexto após sumarização**: Após cada sumarização, o agente perde informações cruciais sobre:
+**Arquivo**: [src/summarization.py](src/summarization.py)
+- Implementada classe `SummarizationMiddleware` customizada (536 linhas)
+- Corrigida invocação do modelo durante sumarização (suporte a `.text`)
+- Implementado particionamento inteligente de mensagens
+- Binary search para determinar ponto de corte ideal
+- Preservação de pares AI/Tool messages
+
+**Configuração Final** (em [src/agent.py](src/agent.py:65-71)):
+```python
+sum_middleware = SummarizationMiddleware(
+    model=model,
+    trigger=("fraction", 0.5),       # 50% do limite máximo do modelo
+    keep=("fraction", 0.2),          # Mantém 20% do contexto mais recente
+    trim_tokens_to_summarize=6000,   # 6000 tokens para criar resumo
+    summary_prompt=SUMMARIZATION_PROMPT,
+)
+```
+
+**Status**: ✅ Testado e funcionando perfeitamente
+**Documentação**: Ver [RELEASE_NOTES_v1.1.8.md](RELEASE_NOTES_v1.1.8.md)
+
+---
+
+## Problema Original (Identificado em versões ≤ 1.1.5)
+
+O agente estava entrando em loop infinito devido a três problemas principais:
+
+1. **Sumarização muito agressiva**: O middleware de sumarização estava configurado para manter apenas 4000 tokens, o que era insuficiente para o agente lembrar o progresso da análise.
+
+2. **Perda de contexto após sumarização**: Após cada sumarização, o agente perdia informações cruciais sobre:
    - Quais arquivos já foram analisados
    - Estrutura da codebase descoberta
    - Progresso atual da tarefa
 
-3. **Ausência de mecanismo de estado persistente**: O agente não tem um mecanismo para rastrear progresso fora do histórico de mensagens.
+3. **Ausência de mecanismo de estado persistente**: O agente não tinha um mecanismo para rastrear progresso fora do histórico de mensagens.
 
 ## Análise do Trace Langfuse
 

@@ -48,7 +48,16 @@ During the analysis, you must write your conclusiong in a file named DRAFT.md.
 
 ## First part of the analysis
 
-**You MUST use write_todos tool to manage the following steps progress. The usage of write_todos is mandatory.**
+### **IMPORTANT -> Plan the analysis!**
+- You MUST use write_todos tool to manage the following steps progress. The steps content description must have as much detailement as possible.
+- **The usage of write_todos is mandatory.**
+- EVERY STEP must include a sentence saing the results and 
+conclusions in the DRAFT.md file with write_file tool. 
+
+Examples of correct step content:
+- 'List the entire directory tree of the Airflow codebase. Then write it to the DRAFT.md file'
+- Classify the project type (application vs library)
+
 
 1. Start by listing the entire directory tree of the codebase.
    - You MUST expand recursively all directories that belong to the main code package (e.g. src/, app/, packages/, services/).
@@ -56,7 +65,6 @@ During the analysis, you must write your conclusiong in a file named DRAFT.md.
    -  Write the full tree to DRAFT.md file with write_file tool. You must include all modules the codebase, not only the most obvious ones.
 
 2. Map files that seems to be code entrypoints according to the file names and location. Read theses files. If you don't find the entrypoints, keep reading other files until you find all code entrypoints. Register every entrypoints you found in the DRAFT.md file, considering that each entrypoint finding register in the draft file must contain the entrypoint file path, what the entrypoint is used for, which components of the codebase it uses, which files have the components that this entrypoints uses, how this entrypoint is triggered or called and what is its role of the entrypoint in the whole codebase. Write  your conclusions to the DRAFT.md file with write_file tool.
-
 
 3. After identifying candidate entrypoints, you MUST classify the project as:
 - Application (server, CLI, worker), or
@@ -66,7 +74,7 @@ Entry points MUST be interpreted according to this classification.
 If the project is classified as a Library:
 - Entry points mean public API surface (exported functions/classes) and their primary call paths.
 - Do NOT treat internal orchestration classes as boot entrypoints.
-Register it on the DRAFT.md file with write_file tool.
+Register everything on the DRAFT.md file with write_file tool.
 
 4. Identify the real I/O boundaries of the system (network, database, external APIs).
 You MUST locate the exact files/modules where external communication occurs and register them in DRAFT.md with write_file tool as outbound boundaries.
@@ -89,13 +97,10 @@ You MUST locate the exact files/modules where external communication occurs and 
 
 ## Second part of the analysis
 
-1. Read everything you've written in the DRAFT.md file
-2. Check if all the previously steps are registered in the DRAFT.md file. Every step MUST be registered in the DRAFT.md file. If any step is not written in this file, you must repeat this step and REGISTER it in the DRAFt.md file with write_file tool.
+-  You MUST read **everything** you've written in the DRAFT.md file and validate its content correctness. Read one-by-one step content, validating if attends the requisites described in the `First part of the analysis` while you read the mentioned files, verifying each draft file section and correcting the incomplete/incorrect content with the write_file tool, rewriting the DRAFT.md file.
+- When rewriting the file DRAFT.md, modify only the part you must correct and remain the other parts exactly the same as they were.
 
 <onboarding_instructions>
-
-
-The ONBOARDING.md file is the entire codebase documentation. Its main goal is to provide complete and clear information for a software engineer that is joining the development and don't know the codebase structure, what is does and other inforamtion. Consider you're explaning to the codebase to a recently contracted software engineer.
 
 Before writing ONBOARDING.md, you MUST classify each key file using exactly one primary architectural role:
 - Facade / Public API Surface
@@ -117,7 +122,11 @@ Before generating ONBOARDING.md, verify in the DRAFT.md file:
 
 If any condition fails, continue analysis (registering in DRAFT.md) and DO NOT generate ONBOARDING.md.
 
+
+
 When all the conditions above get satisfied, write the ONBOARDING.md file following these criterias:
+
+The ONBOARDING.md file is the entire codebase documentation. Its main goal is to provide complete and clear information for a software engineer that is joining the development and don't know the codebase structure, what is does and other inforamtion. Consider you're explaning to the codebase to a recently contracted software engineer.
 
 The ONBOARDING.md file must contain:
 
@@ -216,7 +225,10 @@ The ONBOARDING.md file must contain:
     - Why this file/module should be read at this stage
     - How it connects to previously read parts
 
-### **You must ensure that all these sections are present in the ONBOARDING.md file. An ONBOARDING.md file without all the sections is something unacceptable. Only complete ONBOARDING.md file with all sections are acceptable.**
+
+
+### ONBOARDING.md 
+ **You must ensure that all these sections are present in the ONBOARDING.md file. An ONBOARDING.md file without all the sections is something unacceptable. Only complete ONBOARDING.md file with all sections are acceptable.**
 
 </onboarding_instructions>
 

@@ -6,8 +6,6 @@ atual e recomendada do ecossistema LangChain para criação de agentes.
 
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
-from langchain.rate_limiters import InMemoryRateLimiter
-
 from .prompts import SYSTEM_PROMPT, SUMMARIZATION_PROMPT
 from .tools import list_dir, read_file, write_file, remove_draft_file
 
@@ -86,7 +84,7 @@ def create_codebase_agent(model_name: str = "anthropic:claude-sonnet-4-5"):
 
     agent = create_agent(
         model=model,
-        middleware=[sum_middleware, ctx_edit, todo_middlware, tool_retry],
+        middleware=[sum_middleware, todo_middlware, tool_retry],
         tools=tools,
         system_prompt=SYSTEM_PROMPT,
     )
